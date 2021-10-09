@@ -81,7 +81,7 @@ func (h *UserHandler) getUser(w http.ResponseWriter, r *http.Request) {
 	userResult := h.userCollection.FindOne(context.Background(), bson.D{{"_id", id}})
 	err := userResult.Decode(user)
 	if err != nil {
-		w.Write([]byte("unable to get data"))
+		http.Error(w, "no user with this id", http.StatusBadRequest)
 	} else {
 		// Marshal user data to json and send to client
 		functions.WriteJson(w, r, user)

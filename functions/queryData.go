@@ -9,6 +9,7 @@ import (
 func GetLimitAndOffset(w http.ResponseWriter, r *http.Request) (int64, int64, error) {
 	query := r.URL.Query()
 	str := query.Get("limit")
+	fmt.Println(str)
 	if len(str) == 0 {
 		return 0, 0, fmt.Errorf("limit is not given in query parameter")
 	}
@@ -17,6 +18,7 @@ func GetLimitAndOffset(w http.ResponseWriter, r *http.Request) (int64, int64, er
 		return 0, 0, fmt.Errorf("limit needs to be an integer")
 	}
 	str = query.Get("offset")
+	fmt.Println(str)
 	if len(str) == 0 {
 		return 0, 0, fmt.Errorf("offset is not given in query parameter")
 	}

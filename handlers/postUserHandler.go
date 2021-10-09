@@ -33,6 +33,9 @@ func (h *PostUserHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 			if err1 != nil {
 				http.Error(w, err1.Error(), http.StatusBadRequest)
 			}
+			if limit > 20 {
+				http.Error(w, "limit cannot be more than 20", http.StatusBadRequest)
+			}
 
 			// finding a set of posts of the user from databse
 			postCursor, err := h.postCollection.Find(context.Background(), bson.D{{"userId", userId}}, &options.FindOptions{
@@ -41,7 +44,7 @@ func (h *PostUserHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 				Skip:  &offset,
 			})
 			if err != nil {
-				http.Error(w, err.Error(), http.StatusInternalServerError)
+				http.Error(w, err.Error(), http.StatusBadRequest)
 				return
 			}
 
@@ -57,7 +60,7 @@ func (h *PostUserHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 
 	default:
 		{
-			w.Write([]byte("Method not implemented"))
+			http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
 		}
 	}
 

@@ -75,7 +75,7 @@ func (h *PostHandler) getPost(w http.ResponseWriter, r *http.Request) {
 	// getting post from database
 	err := h.postCollection.FindOne(context.Background(), bson.D{{"_id", id}}).Decode(post)
 	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
+		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
 	}
 	// sending the post to user
