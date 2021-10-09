@@ -8,6 +8,7 @@ import (
 
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/mongo"
+	"go.mongodb.org/mongo-driver/mongo/options"
 )
 
 type PostUserHandler struct {
@@ -27,8 +28,18 @@ func (h *PostUserHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 			// getting id from url
 			userId := r.URL.Path[len("/posts/users/"):]
 
+			// getting query parameters of pagmentation
+			limit, offset, err1 := functions.GetLimitAndOffset(w, r)
+			if err1 != nil {
+				http.Error(w, err1.Error(), http.StatusBadRequest)
+			}
+
 			// finding a set of posts of the user from databse
-			postCursor, err := h.postCollection.Find(context.Background(), bson.D{{"userId", userId}})
+			postCursor, err := h.postCollection.Find(context.Background(), bson.D{{"userId", userId}}, &options.FindOptions{
+				// Limiting the number of data retrieved from the database at a time
+				Limit: &limit,
+				Skip:  &offset,
+			})
 			if err != nil {
 				http.Error(w, err.Error(), http.StatusInternalServerError)
 				return
