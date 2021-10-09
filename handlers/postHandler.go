@@ -2,10 +2,9 @@ package handlers
 
 import (
 	"Appointy-Instagram/data"
+	"Appointy-Instagram/functions"
 	"context"
-	"encoding/json"
 	"fmt"
-	"io/ioutil"
 	"math/rand"
 	"net/http"
 	"strconv"
@@ -37,45 +36,48 @@ func (h *PostHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 }
 
 func (h *PostHandler) createPost(w http.ResponseWriter, r *http.Request) {
-	body, err := ioutil.ReadAll(r.Body)
-	if err != nil {
-		http.Error(w, err.Error(), http.StatusBadRequest)
+	// getting post from request body
+	post := &data.InPost{}
+	ok := functions.ReadJson(w, r, post)
+	if !ok {
+		return
 	}
 
-	post := &data.Post{}
-	json.Unmarshal(body, post)
+	//validating post
+	if err := functions.ValidatePost(post); err != nil {
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
+	}
 
-	fmt.Println(post)
-
+	// Generating random id for post
 	rand.Seed(time.Now().UnixNano())
 	post.Id = strconv.FormatInt(int64(rand.Uint64()), 10)
+	// Generating time stamp
 	post.PostedTimestamp = time.Now()
 
-	err = nil
-	_, err = h.postCollection.InsertOne(context.Background(), post)
+	// Inserting post into the database
+	_, err := h.postCollection.InsertOne(context.Background(), post)
 	if err != nil {
 		w.Write([]byte(err.Error()))
-	} else {
-		w.Write([]byte("successfully created post"))
+		return
 	}
 
+	// Post successfully created
+	w.Write([]byte("successfully created post"))
 }
 
 func (h *PostHandler) getPost(w http.ResponseWriter, r *http.Request) {
+	//getting id from url
 	id := r.URL.Path[len("/posts/"):]
 	fmt.Println(id)
 
-	post := &data.Post{}
-
+	post := &data.OutPost{}
+	// getting post from database
 	err := h.postCollection.FindOne(context.Background(), bson.D{{"_id", id}}).Decode(post)
 	if err != nil {
-		w.Write([]byte("Post does not exist"))
-	} else {
-		jsonPost, err := json.Marshal(post)
-		if err != nil {
-			w.Write([]byte("Unable to marshal post"))
-		} else {
-			w.Write(jsonPost)
-		}
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
 	}
+	// sending the post to user
+	functions.WriteJson(w, r, post)
 }

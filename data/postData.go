@@ -4,10 +4,18 @@ import (
 	"time"
 )
 
-type Post struct {
+type InPost struct {
 	UserId          string    `json:"userId" bson:"userId"`
 	Id              string    `json:"id" bson:"_id"`
 	Caption         string    `json:"caption" bson:"caption"`
 	ImgUrl          string    `json:"imgUrl" bson:"imgUrl"`
-	PostedTimestamp time.Time `json:"postedTimestamp" bson:"postedTimestamp"`
+	PostedTimestamp time.Time `json:"-" bson:"postedTimestamp"`
+}
+
+type OutPost struct {
+	UserId          string    `json:"userId" bson:"userId"`
+	Id              string    `json:"id" bson:"_id"`
+	Caption         string    `json:"caption" bson:"caption"`
+	ImgUrl          string    `json:"imgUrl" bson:"imgUrl"`
+	PostedTimestamp time.Time `json:"postedTimeStamp" bson:"postedTimestamp"`
 }
