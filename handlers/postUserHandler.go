@@ -28,7 +28,7 @@ func (h *PostUserHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 			// getting id from url
 			userId := r.URL.Path[len("/posts/users/"):]
 
-			// getting query parameters of pagmentation
+			// getting query parameters of pagination
 			limit, offset, err1 := functions.GetLimitAndOffset(w, r)
 			if err1 != nil {
 				http.Error(w, err1.Error(), http.StatusBadRequest)
